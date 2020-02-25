@@ -39,13 +39,6 @@ class LanguageSetter implements BootstrapInterface
 
     public function bootstrap($app)
     {
-        //preferredLanguage:  aa-AA
-        //user->language aa-AA
-        //app->language: aa-AA
-
-        // Find preferred language in cookie, app settings and user settings
-        $this->langFromBrowser = substr($this->request->getHeaders()->get('HTTP_ACCEPT_LANGUAGE'), 0, 2);
-
         $isGuest = $app->user->isGuest;
         $user = $app->user->identity;
 
@@ -53,33 +46,20 @@ class LanguageSetter implements BootstrapInterface
 
         if ($isGuest) {
             $preferredLanguage = $this->getPreferredLanguageForGuest($app, $cookieLanguage);
-        }
+        } else {
+            $preferredLanguage = $this->getPreferredLanguageForUser($user, $cookieLanguage);
 
-
-        if (!$isGuest && !empty($user->language)) {
-            $preferredLanguage = $user->language;
-            Cookies::setCookie('language', $preferredLanguage);
-        }
-
-        if (empty($preferredLanguage)) {
-            $preferredLanguage = !empty($cookieLanguage) ? $cookieLanguage : $this->request->getPreferredLanguage($this->supportedLanguages);
-        }
-
-        // Set preferred language
-        if (is_numeric($preferredLanguage)) {
-            $preferredLanguage = Languages::getLangCode($preferredLanguage);
-        }
-
-
-        if (!$isGuest) {
-            $app->language = $preferredLanguage;
-            Cookies::setCookie('language', $preferredLanguage);
+            if (is_numeric($preferredLanguage)) {
+                $preferredLanguage = Languages::getLangCode($preferredLanguage);
+            }
 
             if ((empty($user->language)) || ($user->language != $preferredLanguage)) {
                 $this->saveUserLanguage($user, $preferredLanguage);
             }
         }
-        $this->setLocale($preferredLanguage);
+
+        Cookies::setCookie('language', $preferredLanguage);
+        $this->setLocale($app, $preferredLanguage);
 
         return $preferredLanguage;
     }
@@ -92,14 +72,28 @@ class LanguageSetter implements BootstrapInterface
     private function getPreferredLanguageForGuest($app, ?string $cookieLanguage): string
     {
         $this->langFromBrowser = substr($this->request->getHeaders()->get('HTTP_ACCEPT_LANGUAGE'), 0, 2);
-        $preferredLanguage = !is_null($cookieLanguage) ? $cookieLanguage : Languages::getLangCodeFromShortCode($this->langFromBrowser);
-        $app->language = $preferredLanguage;
 
         if (!is_null($cookieLanguage)) {
+            $preferredLanguage = $cookieLanguage;
             $this->langFromBrowser = $preferredLanguage;
-            Cookies::setCookie('language', $preferredLanguage);
+            return $preferredLanguage;
         }
-        return $preferredLanguage;
+        return Languages::getLangCodeFromShortCode($this->langFromBrowser);
+    }
+
+    /**
+     * @param $user
+     * @param string|null $cookieLanguage
+     * @return string
+     */
+    private function getPreferredLanguageForUser($user, ?string $cookieLanguage): string
+    {
+        if (!empty($user->language)) {
+            return $user->language;
+        } elseif (!empty($cookieLanguage)) {
+            return $cookieLanguage;
+        }
+        return $this->request->getPreferredLanguage($this->supportedLanguages);
     }
 
     /**
@@ -113,10 +107,12 @@ class LanguageSetter implements BootstrapInterface
     }
 
     /**
+     * @param $app
      * @param string $language
      */
-    private function setLocale(string $language): void
+    private function setLocale($app, string $language): void
     {
+        $app->language = $language;
         $languageUnderscore = str_replace('-', '_', $language);
         setlocale(LC_ALL, $languageUnderscore . '.utf8');
     }

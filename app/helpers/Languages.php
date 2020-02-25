@@ -15,11 +15,13 @@ class Languages
     }
 
     /**
-     * @param string $lang
+     * @param int $langCode
      * @return string
      */
-    public static function getLangCode(string $lang): string
+    public static function getLangCode(int $langCode): string
     {
-        return $lang;
+        //I think I should convert lang code to string by download languages table and find correct language
+        //return is mock
+        return 'en-GB';
     }
 }

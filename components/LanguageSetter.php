@@ -45,7 +45,7 @@ class LanguageSetter implements BootstrapInterface
         $cookieLanguage = Cookies::getCookie('language');
 
         if ($isGuest) {
-            $preferredLanguage = $this->getPreferredLanguageForGuest($app, $cookieLanguage);
+            $preferredLanguage = $this->getPreferredLanguageForGuest($cookieLanguage);
         } else {
             $preferredLanguage = $this->getPreferredLanguageForUser($user, $cookieLanguage);
 
@@ -65,11 +65,10 @@ class LanguageSetter implements BootstrapInterface
     }
 
     /**
-     * @param $app
      * @param string|null $cookieLanguage
      * @return string
      */
-    private function getPreferredLanguageForGuest($app, ?string $cookieLanguage): string
+    private function getPreferredLanguageForGuest(?string $cookieLanguage): string
     {
         $this->langFromBrowser = substr($this->request->getHeaders()->get('HTTP_ACCEPT_LANGUAGE'), 0, 2);
 

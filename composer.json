@@ -2,7 +2,7 @@
     "name": "upsell/language-setter",
     "description": "LangiageSetter test",
     "require": {
-        "php": ">=7.0"
+        "php": ">=7.1"
     },
     "require-dev": {
         "codeception/codeception": "^4.1",

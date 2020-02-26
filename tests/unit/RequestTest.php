@@ -22,10 +22,6 @@ class RequestTest extends \Codeception\Test\Unit
         $this->request = new Request();
     }
 
-    protected function _after()
-    {
-    }
-
     /**
      * @test
      */

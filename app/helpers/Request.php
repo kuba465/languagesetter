@@ -2,6 +2,8 @@
 
 namespace app\helpers;
 
+use app\errors\EmptyArrayException;
+
 class Request
 {
     /**
@@ -25,7 +27,7 @@ class Request
     public function get(string $header)
     {
         if (isset($this->headers[$header])) {
-            return$this->headers[$header];
+            return $this->headers[$header];
         }
         return null;
     }
@@ -33,10 +35,15 @@ class Request
     /**
      * @param array $supportedLanguages
      * @return string
+     * @throws EmptyArrayException
      */
     public function getPreferredLanguage(array $supportedLanguages): string
     {
         $preferredLanguage = 'en-GB';
+        if (!count($supportedLanguages)) {
+            throw new EmptyArrayException('Supported array is empty.');
+        }
+
         if (in_array($preferredLanguage, $supportedLanguages)) {
             return $preferredLanguage;
         }

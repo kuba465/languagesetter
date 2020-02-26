@@ -4,6 +4,7 @@ namespace components;
 
 use app\App;
 use app\contracts\BootstrapInterface;
+use app\errors\EmptyArrayException;
 use app\helpers\Request;
 use app\helpers\Languages;
 use app\helpers\Cookies;
@@ -43,7 +44,11 @@ class LanguageSetter implements BootstrapInterface
             $language->setLanguage(new UserLanguage($this->supportedLanguages));
         }
 
-        $preferredLanguage = $language->getLanguage()->getPreferredLanguage($app, $request, $cookieLanguage);
+        try {
+            $preferredLanguage = $language->getLanguage()->getPreferredLanguage($app, $request, $cookieLanguage);
+        } catch (EmptyArrayException $exception) {
+            return $exception->getMessage();
+        }
         $this->langFromBrowser = $language->getLanguage()->getLangFromBrowser();
 
         $this->convertNumericLanguage($preferredLanguage);

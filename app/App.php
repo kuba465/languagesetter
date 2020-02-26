@@ -36,7 +36,7 @@ class App
     /**
      * @return App
      */
-    private static function getInstance(): App
+    public static function getInstance(): App
     {
         if (self::$instance === null) {
             self::$instance = new App();

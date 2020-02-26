@@ -2,10 +2,15 @@
 
 namespace components;
 
-use app\helpers\Request;
+use app\App;
 use app\contracts\BootstrapInterface;
+use app\helpers\Request;
 use app\helpers\Languages;
 use app\helpers\Cookies;
+use app\languages\GuestLanguage;
+use app\languages\Language;
+use app\languages\UserLanguage;
+use app\models\User;
 
 
 class LanguageSetter implements BootstrapInterface
@@ -23,32 +28,23 @@ class LanguageSetter implements BootstrapInterface
      */
     public $langFromBrowser = null;
 
-    /**
-     * @var Request
-     */
-    private $request;
-
-    /**
-     * LanguageSetter constructor.
-     */
-    public function __construct()
-    {
-        $this->request = new Request();
-    }
-
-
     public function bootstrap($app)
     {
         $isGuest = $app->user->isGuest;
         $user = $app->user->identity;
+        $request = new Request();
 
         $cookieLanguage = Cookies::getCookie('language');
 
+        $language = new Language();
         if ($isGuest) {
-            $preferredLanguage = $this->getPreferredLanguageForGuest($cookieLanguage);
+            $language->setLanguage(new GuestLanguage());
         } else {
-            $preferredLanguage = $this->getPreferredLanguageForUser($user, $cookieLanguage);
+            $language->setLanguage(new UserLanguage($this->supportedLanguages));
         }
+
+        $preferredLanguage = $language->getLanguage()->getPreferredLanguage($app, $request, $cookieLanguage);
+        $this->langFromBrowser = $language->getLanguage()->getLangFromBrowser();
 
         $this->convertNumericLanguage($preferredLanguage);
 
@@ -65,7 +61,7 @@ class LanguageSetter implements BootstrapInterface
     /**
      * @param $preferredLanguage
      */
-    public function convertNumericLanguage(&$preferredLanguage): void
+    private function convertNumericLanguage(&$preferredLanguage): void
     {
         if (is_numeric($preferredLanguage)) {
             $preferredLanguage = Languages::getLangCode($preferredLanguage);
@@ -73,52 +69,20 @@ class LanguageSetter implements BootstrapInterface
     }
 
     /**
-     * @param string|null $cookieLanguage
-     * @return string
-     */
-    private function getPreferredLanguageForGuest(?string $cookieLanguage): string
-    {
-        $this->langFromBrowser = substr($this->request->getHeaders()->get('HTTP_ACCEPT_LANGUAGE'), 0, 2);
-
-        if (!is_null($cookieLanguage)) {
-            $preferredLanguage = $cookieLanguage;
-            $this->langFromBrowser = $preferredLanguage;
-            return $preferredLanguage;
-        }
-        return Languages::getLangCodeFromShortCode($this->langFromBrowser);
-    }
-
-    /**
-     * @param $user
-     * @param string|null $cookieLanguage
-     * @return string
-     */
-    private function getPreferredLanguageForUser($user, ?string $cookieLanguage): string
-    {
-        if (!empty($user->language)) {
-            return $user->language;
-        }
-        if (!empty($cookieLanguage)) {
-            return $cookieLanguage;
-        }
-        return $this->request->getPreferredLanguage($this->supportedLanguages);
-    }
-
-    /**
-     * @param $user
+     * @param User $user
      * @param string $language
      */
-    private function saveUserLanguage($user, string $language): void
+    private function saveUserLanguage(User $user, string $language): void
     {
         $user->language = $language;
         $user->save();
     }
 
     /**
-     * @param $app
+     * @param App $app
      * @param string $language
      */
-    private function setLocale($app, string $language): void
+    private function setLocale(App $app, string $language): void
     {
         $app->language = $language;
         $languageUnderscore = str_replace('-', '_', $language);

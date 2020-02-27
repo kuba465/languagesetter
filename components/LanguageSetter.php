@@ -2,6 +2,8 @@
 
 namespace components;
 
+require_once 'app\contracts\BootstrapInterface.php';
+
 use app\App;
 use app\contracts\BootstrapInterface;
 use app\errors\EmptyArrayException;

@@ -2,7 +2,7 @@
 
 namespace app\languages;
 
-require 'app\languages\AbstractLanguage.php';
+require_once 'app\languages\AbstractLanguage.php';
 
 use app\App;
 use app\helpers\Languages;

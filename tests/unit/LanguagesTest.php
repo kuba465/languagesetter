@@ -1,6 +1,6 @@
 <?php
 
-require 'app\helpers\Languages.php';
+require_once 'app\helpers\Languages.php';
 
 use app\helpers\Languages;
 

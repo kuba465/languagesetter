@@ -2,7 +2,7 @@
 
 use app\helpers\Cookies;
 
-require 'app\helpers\Cookies.php';
+require_once 'app\helpers\Cookies.php';
 
 class CookiesTest extends \Codeception\Test\Unit
 {

@@ -1,7 +1,7 @@
 <?php
 
-require 'app\helpers\Request.php';
-require 'app\errors\EmptyArrayException.php';
+require_once 'app\helpers\Request.php';
+require_once 'app\errors\EmptyArrayException.php';
 
 use app\errors\EmptyArrayException;
 use app\helpers\Request;

@@ -1,8 +1,12 @@
 <?php
 
-
 namespace app\languages;
 
+require_once 'app\languages\LanguageInterface.php';
+require_once 'app\languages\Language.php';
+require_once 'app\helpers\Languages.php';
+require_once 'app\models\User.php';
+require_once 'app\App.php';
 
 use LanguageInterface;
 

@@ -2,6 +2,8 @@
 
 namespace app;
 
+require_once 'app\models\User.php';
+
 use app\models\User;
 
 class App

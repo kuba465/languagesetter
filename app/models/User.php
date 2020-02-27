@@ -29,7 +29,7 @@ class User
      */
     private function __construct()
     {
-        $this->identity = self::getInstance();
+        $this->identity = $this;
     }
 
     private function __clone()
